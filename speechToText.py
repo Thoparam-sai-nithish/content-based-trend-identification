@@ -1,14 +1,13 @@
 import os 
-from faster_whisper import WhisperModel
 
-def convertToText(input_file_path, output_file_path):
+def convertToText(input_file_path, output_file_path, stt_model):
     if not os.path.exists(input_file_path):
         print(f"⚠️  Skipping: {input_file_path} (File not found)")
         return
     
     try:
-        print(f"🎙️  Processing {input_file_path}...")
-        stt_model = WhisperModel("medium", device="cpu", compute_type="int8")
+        print(f"⛏️  Extracting text from {input_file_path}...")
+        # stt_model = WhisperModel("large", device="cpu", compute_type="int8")
 
         segments, info = stt_model.transcribe(input_file_path)
         
@@ -27,11 +26,11 @@ def convertToText(input_file_path, output_file_path):
         print(f"❌  Error processing {input_file_path}: {e}")
 
 
-def batchSpeechToText(input_dir, output_dir, base_file_name):
-    print(f"🎵 ⏭️  🔠 Converting {base_file_name} chunks into text")
+def batchSpeechToText(input_dir, output_dir, base_file_name, stt_model):
+    print(f"🔠 Converting {base_file_name} chunks into text")
 
     if not os.path.exists(input_dir):
-        print(f"❌  Direcotry '{input_dir}' does not exists")
+        print(f"❌  Directory '{input_dir}' does not exists")
         return
 
     os.makedirs(output_dir, exist_ok=True)
@@ -41,12 +40,12 @@ def batchSpeechToText(input_dir, output_dir, base_file_name):
     with open(output_file_path, "w", encoding="utf-8") as f:
         print(f"📝 Created a empty file at {output_file_path}")
  
-    chunks_dirs_list = sorted(os.listdir(input_dir))
-    print(f"📂 Chunks found: {chunks_dirs_list}")
+    chunks_dirs_list = os.listdir(input_dir)
+    print(f"📂 Spleetered chunks found: {chunks_dirs_list}")
 
     for chunk_dir in chunks_dirs_list:
         input_file_path = os.path.join(input_dir, chunk_dir,"vocals.wav")
-        convertToText(input_file_path,  output_file_path)
+        convertToText(input_file_path,  output_file_path,stt_model)
 
 
 if __name__ == "__main__":

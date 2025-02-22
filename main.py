@@ -1,18 +1,20 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
 import tensorflow as tf
-tf.get_logger().setLevel('ERROR')
-# Disable TensorFlow eager execution
-tf.compat.v1.disable_eager_execution()
-
 import preprocessAudio
 from videoToAudio import convertVideoToWav
 from spleeter.separator import Separator
+from faster_whisper import WhisperModel
 from speechToText import batchSpeechToText
 import shutil
 import time
+
+# Optimize TensorFlow for Colab
+tf.config.optimizer.set_jit(True)
+
+physical_devices = tf.config.list_physical_devices('GPU')
+if physical_devices:
+    print(f"Using GPU: {physical_devices[0]}")
+    tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 def main():
     video_dir = 'videos'
@@ -22,8 +24,9 @@ def main():
     convertVideoToWav(video_dir, raw_audio_dir)
     print()
     # Create a common separator
-    separator = Separator('spleeter:2stems')
-
+    separator = Separator('spleeter:5stems', stft_backend='tensorflow')
+    # Create a common STT model
+    stt_model = WhisperModel("large-v3", device="cuda", compute_type="float16")
 
     raw_files = os.listdir(raw_audio_dir)
     for file_name in raw_files:
@@ -32,7 +35,7 @@ def main():
 
             os.makedirs(spleetered_audio_dir, exist_ok=True)
 
-            batchSpeechToText(spleetered_audio_dir, text_dir, file_name)
+            batchSpeechToText(spleetered_audio_dir, text_dir, file_name, stt_model)
 
             time.sleep(1)
             shutil.rmtree(spleetered_audio_dir)

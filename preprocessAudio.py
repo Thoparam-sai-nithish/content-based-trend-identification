@@ -3,23 +3,23 @@ import shutil
 import time
 import librosa
 import noisereduce as nr
-from spleeter.separator import Separator
 import soundfile as sf
 from pydub import AudioSegment 
   
 
-def cancelNoise(input_dir, file_name, output_dir, boost_factor = 2):
+def cancelNoise(input_dir, file_name, output_dir, boost_factor = 2.5):
     file_path = os.path.join(input_dir, file_name)
 
     # Load original audio
-    y, sr = librosa.load(file_path, sr=None)
+    y, sr = librosa.load(file_path, sr=None, mono = True)
 
     # Apply noise reduction
     noise_reduced_audio = nr.reduce_noise(y=y, sr=sr, 
                                           stationary=False,
                                           prop_decrease=0.7,
                                           n_fft=4096,
-                                          thresh_n_mult_nonstationary=2)
+                                          time_mask_smooth_ms=64,
+                                          thresh_n_mult_nonstationary=1.8)
     
     # amplify audio
     amplified_audio = noise_reduced_audio * boost_factor
