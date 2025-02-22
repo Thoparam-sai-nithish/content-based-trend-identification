@@ -24,7 +24,7 @@ def main():
     convertVideoToWav(video_dir, raw_audio_dir)
     print()
     # Create a common separator
-    separator = Separator('spleeter:5stems', stft_backend='tensorflow')
+    separator = Separator('spleeter:5stems')
     # Create a common STT model
     stt_model = WhisperModel("large-v3", device="cuda", compute_type="float16")
 
