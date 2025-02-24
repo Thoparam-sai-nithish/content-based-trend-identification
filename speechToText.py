@@ -49,7 +49,7 @@ def convert_to_text(input_file_path, output_file_path, language_code = "en-IN", 
             "ffmpeg", "-i", input_file_path, "-ac", "1", "-ar", "44100", "-f", "wav", mono_audio
         ], check=True, stderr=subprocess.DEVNULL) 
 
-        key_file_path = os.path.join('privateKeys', 'content-based-trend-detection-cd9d52ddb82b.json')
+        key_file_path = os.path.join('privateKeys', 'content-based-trend-detection-key.json')
         credentials = service_account.Credentials.from_service_account_file(key_file_path)
         client = speech.SpeechClient(credentials=credentials)
 
