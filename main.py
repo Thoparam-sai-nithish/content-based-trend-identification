@@ -1,20 +1,19 @@
 import os
-import tensorflow as tf
+from utils import rmRecur
 import preprocessAudio
-from videoToAudio import convertVideoToWav
 from spleeter.separator import Separator
-from faster_whisper import WhisperModel
+import tensorflow as tf
 from speechToText import batchSpeechToText
-import shutil
-import time
+from videoToAudio import convertVideoToWav
+from languageTranslator import translate_text_files
 
-# Optimize TensorFlow for Colab
-tf.config.optimizer.set_jit(True)
+# AVOID CUDA WARNINGS
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+# DISABLE EAGER EXECUTION
+tf.get_logger().setLevel('ERROR')
+tf.compat.v1.disable_eager_execution()
 
-physical_devices = tf.config.list_physical_devices('GPU')
-if physical_devices:
-    print(f"Using GPU: {physical_devices[0]}")
-    tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 def main():
     video_dir = 'videos'
@@ -23,10 +22,13 @@ def main():
     text_dir = "textFiles"
     convertVideoToWav(video_dir, raw_audio_dir)
     print()
+
     # Create a common separator
-    separator = Separator('spleeter:5stems')
+    separator = Separator('spleeter:2stems')
+
     # Create a common STT model
-    stt_model = WhisperModel("large-v3", device="cuda", compute_type="float16")
+    # stt_model = WhisperModel("large-v2", device="cpu", compute_type="int8")
+    stt_model = "stt_model"
 
     raw_files = os.listdir(raw_audio_dir)
     for file_name in raw_files:
@@ -37,14 +39,14 @@ def main():
 
             batchSpeechToText(spleetered_audio_dir, text_dir, file_name, stt_model)
 
-            time.sleep(1)
-            shutil.rmtree(spleetered_audio_dir)
-            print(f"🚮  Deleted Directory: {spleetered_audio_dir} for {file_name}")
+            rmRecur(spleetered_audio_dir)
 
         except Exception as e:
             print(print(f"❌ Error processing file {file_name}: {e}"))
 
         print()
+    translate_text_files('textFiles', 'translatedFiles')
+
 
 if __name__ == "__main__":
     main()

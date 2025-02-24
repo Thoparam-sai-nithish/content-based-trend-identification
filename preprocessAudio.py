@@ -1,25 +1,25 @@
 import os
-import shutil
+from utils import rmRecur
 import time
 import librosa
 import noisereduce as nr
+from spleeter.separator import Separator
 import soundfile as sf
 from pydub import AudioSegment 
   
 
-def cancelNoise(input_dir, file_name, output_dir, boost_factor = 2.5):
+def cancelNoise(input_dir, file_name, output_dir, boost_factor = 2):
     file_path = os.path.join(input_dir, file_name)
 
     # Load original audio
-    y, sr = librosa.load(file_path, sr=None, mono = True)
+    y, sr = librosa.load(file_path, sr=None)
 
     # Apply noise reduction
     noise_reduced_audio = nr.reduce_noise(y=y, sr=sr, 
                                           stationary=False,
                                           prop_decrease=0.7,
                                           n_fft=4096,
-                                          time_mask_smooth_ms=64,
-                                          thresh_n_mult_nonstationary=1.8)
+                                          thresh_n_mult_nonstationary=2)
     
     # amplify audio
     amplified_audio = noise_reduced_audio * boost_factor
@@ -112,12 +112,6 @@ def preprocess(raw_audio_dir, spleetered_audio_dir, file_name, separator):
     os.makedirs(spleetered_audio_dir, exist_ok=True)
     print(f"🎺 Seperatnig Vocals From {file_path}")
     batchVocalsSeparator(noise_cancelled_dir, spleetered_audio_dir, separator)
-
-    def rmRecur(directory_path):
-        if os.path.exists(directory_path):
-            time.sleep(2) 
-            shutil.rmtree(directory_path)
-            print(f"🚮 Deleted directory: {directory_path}")
 
     rmRecur(audio_chunks_dir)
     rmRecur(noise_cancelled_dir)

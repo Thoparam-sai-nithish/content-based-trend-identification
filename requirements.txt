@@ -12,3 +12,6 @@ faster-whisper==1.1.1
 torch
 torchvision
 torchaudio
+google-cloud-speech
+langdetect
+protobuf==3.19.0
