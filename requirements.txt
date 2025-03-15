@@ -23,3 +23,6 @@ grpcio==1.70.0
 grpcio-status==1.49.0rc1
 deep-translator==1.11.4
 bertopic==0.16.4
+gensim
+emoji
+contractions

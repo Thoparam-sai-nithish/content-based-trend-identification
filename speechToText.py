@@ -32,7 +32,7 @@ def detect_language(input_file_path):
 
     return "en-IN"
 
-def convert_to_text(input_file_path, output_file_path, language_code = "en-IN", stt_model="STT"):
+def convert_to_text(input_file_path, output_file_path, language_code = "en-US", stt_model="STT"):
     if not os.path.exists(input_file_path):
         print(f"⚠️  Skipping: {input_file_path} (File not found)")
         return

@@ -6,6 +6,7 @@ import tensorflow as tf
 from speechToText import batchSpeechToText
 from videoToAudio import convertVideoToWav
 from languageTranslator import translate_text_files
+from ldaAnalyser import lda_analyser
 
 # AVOID CUDA WARNINGS
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
@@ -46,6 +47,7 @@ def main():
 
         print()
     translate_text_files('textFiles', 'translatedFiles')
+    print(lda_analyser('translatedFiles'))
 
 
 if __name__ == "__main__":
